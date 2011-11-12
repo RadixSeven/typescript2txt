@@ -42,7 +42,13 @@ void addchar(int c) {
     if(buffer_size==0) {
       buffer_size=128;
     } else {
-      buffer_size*=2;
+      if (buffer_size <= (1<<30)){
+	buffer_size*=2;
+      }else{
+	fprintf(stderr,
+		"\nLINE TOO LONG FOR MAXIMUM BUFFER SIZE (len: %d)!!!\n", len);
+	exit(2);
+      }
     }
     buffer=(char*)realloc((void *)buffer, buffer_size);
     if (buffer==NULL) {
@@ -107,7 +113,7 @@ int main () {
     if (c<32) {
       lastESC=0;
       switch(d) {
-      case 'H' : len--; break;
+      case 'H' : len--; if(len < 0){ len = 0; }; break;
       case 'J' : addchar(0); puts(buffer); len=0; break;
       case 'M' : lastM=1; break;
       case 'G' : break;
