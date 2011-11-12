@@ -1,2 +1,4 @@
 typescript2txt
 *.o
+
+test_01_actual_output.txt

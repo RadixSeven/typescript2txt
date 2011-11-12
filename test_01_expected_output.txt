@@ -1,0 +1,38 @@
+Script started on Thu 03 Nov 2011 02:20:51 PM EDT
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+protein:...ta-Sets/Synthetic Data Sets/6$ ls -l *.arff
+-rw-r--r-- 1 eric bioinf 2304095 2011-11-03 14:06 foo33.arff
+-rw-r--r-- 1 eric bioinf 4373673 2011-11-03 13:47 foo65.arff
+-rw-r--r-- 1 eric bioinf 1139290 2011-11-03 13:41 foo.arff
+protein:...ta-Sets/Synthetic Data Sets/6$ ls -lh *.arff
+-rw-r--r-- 1 eric bioinf 2.2M 2011-11-03 14:06 foo33.arff
+-rw-r--r-- 1 eric bioinf 4.2M 2011-11-03 13:47 foo65.arff
+-rw-r--r-- 1 eric bioinf 1.1M 2011-11-03 13:41 foo.arff
+protein:...ta-Sets/Synthetic Data Sets/6$ rm foo.arff
+protein:...ta-Sets/Synthetic Data Sets/6$ mkdir ~/ANN_Data
+protein:...ta-Sets/Synthetic Data Sets/6$ rmdir ~/ANN_Data/
+protein:...ta-Sets/Synthetic Data Sets/6$ mkdir ~/PkFindData
+protein:...ta-Sets/Synthetic Data Sets/6$ mv foo33.arff ~/PkFindData/two_spectra_window_33.arff
+protein:...ta-Sets/Synthetic Data Sets/6$ mv foo65.arff ~/PkFindData/two_spectra_window_65.arff
+protein:...ta-Sets/Synthetic Data Sets/6$ pushd ~/PkFindData/
+~/PkFindData ~/Dropbox/NMR-Training-and-Testing-Data-Sets/Synthetic Data Sets/6
+protein:~/PkFindData$ waffles_learn splittest -reps 10 -stddev -trainratio .7 Error:_Unexpected_token,_0,34,35,_in_arg_8^Cignore 0,34,35 -labels 36 neuralnet
+protein:~/PkFindData$ waffles_learn splittest -reps 10 -stddev -trainratio .7 foo33.arff -ignore 0,34,35 -labels 36 neuralnet
+_________________________________
+File not found: foo33.arff
+
+Brief Usage Information:
+
+waffles_learn splittest <options> [dataset] <data_opts> [algorithm]
+   This shuffles the data, then splits it into two parts, trains with one part,
+   and tests with the other. (This also works with model-free algorithms.)
+   Results are printed to stdout for each dimension in the label vector.
+   Predictive accuracy is reported for nominal labels, and mean-squared-error
+   is reported for continuous labels.
+   <options>
+      -seed [value]
+         Specify a seed for the random number generator. (Use this option to
+         ensure that your results are reproduceable.)
+      -trainratio [value]
