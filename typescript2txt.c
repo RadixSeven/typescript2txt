@@ -1,9 +1,11 @@
 /********************************************************************
  * "man script" reports the following bug
+ *
  *      Script places everything in the log file, including linefeeds and backspaces.  This is not what the naive user expects.
+ *
  * This program converts a script file back into a normal text file
  *
- * USAGE: typescript < script > script.txt
+ * USAGE: typescript2txt < script_output > script.txt
  *
  * Although this does not handle all possible xterm output, it appears
  * to work fairly well for normal output from bash etc. 
@@ -26,12 +28,14 @@
  * of the BSD and GPL licenses.
  *******************************************************************/
 
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <stdint.h>
 
 char* buffer=NULL;
-size_t  buffer_size=0;
-size_t  len;
+int32_t  buffer_size=0;
+int32_t  len;
 
 void addchar(int c) {
 	if(len >= buffer_size) {
@@ -58,7 +62,6 @@ void handleESC(char c) {
 	int s[16];
 	int i=0;
 	int n=0;
-	int j;
 	s[i]=getchar();
 	if (isdigit(s[i])) { n=n*10+(s[i]-'0'); i++;  s[i]=getchar();}
 	if (isdigit(s[i])) { n=n*10+(s[i]-'0'); i++;  s[i]=getchar();}
