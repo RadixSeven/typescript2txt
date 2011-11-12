@@ -18,8 +18,8 @@ typescript2txt < output_of_script_cmd > output_as_plain_text
 
 This started life as code written by John C. McCabe-Dansted
 (gmatht@gmail.com) in 2008 and posted at
-https://launchpadlibrarian.net/14571190/script2txt.c as part of a (bug
-report on launchpad)[https://bugs.launchpad.net/ubuntu/+source/util-linux/+bug/231340].
+https://launchpadlibrarian.net/14571190/script2txt.c as part of a [bug
+report on launchpad](https://bugs.launchpad.net/ubuntu/+source/util-linux/+bug/231340).
 It had some memory access problems (that kept RadixSeven from using it
 as-is) so he decided to fix it.  In order to share it with the world,
 he made a github repo for it.
