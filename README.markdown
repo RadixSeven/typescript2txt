@@ -14,6 +14,15 @@ And generate output closer to what the naive user would expect.
 
 typescript2txt < output_of_script_cmd > output_as_plain_text
 
+#Compilation
+
+The code is set up to compile under linux using gcc and gmake.
+
+    make
+
+Will compile everything and produce a typescript2txt executable.  No
+install target has been created.
+
 #History
 
 This started life as code written by John C. McCabe-Dansted
