@@ -60,43 +60,109 @@ void addchar(int c) {
   len++;
 }
 
-/* caret converts a charater M into a character '^M' */
+/// caret converts a charater 'M' into a character '^M'
 int caret(int c) { return (c-'A'+1); }
+
+/// dcaret converts a charater '^M' into a character 'M'
 int decaret(int c) { return (c+'A'-1); }
 
-void handleESC(char c) {
-  int s[16];
-  int i=0;
-  int n=0;
-  s[i]=getchar();
-  if (isdigit(s[i])) { n=n*10+(s[i]-'0'); i++;  s[i]=getchar();}
-  if (isdigit(s[i])) { n=n*10+(s[i]-'0'); i++;  s[i]=getchar();}
-  if (isdigit(s[i])) { n=n*10+(s[i]-'0'); i++;  s[i]=getchar();}
-  if (isdigit(s[i])) { n=n*10+(s[i]-'0'); i++;  s[i]=getchar();}
-  if (c=='[') {
-    if (s[0]=='0' && s[1]=='1' && s[2]==';') {
-      //  ^[[01;34m == <colour='cyan'>
-      //  ^[[01;31m == <colour='red'>
-      //  ^[[00m == </colour>
-      i++;  s[i]=getchar();
-      i++;  s[i]=getchar();
-      i++;  s[i]=getchar();
+enum { RESTART_ESC = 256,
+       INTER_ESC = 257,
+       EOF_TGCHAR = 258,
+};
+
+/// tgetchar like getchar but does "terminal" processing returning the first non-control character
+///
+/// If the return value is greater than 255 then the last character
+/// read requires a state change.  
+///
+/// RESTART_ESC: must restart any escape sequence in progress
+///
+/// INTER_ESC: must interupt the escape sequence in progress
+///
+/// EOF_TGCHAR: ran into eof
+int tgetchar(){
+  int c;
+  while(1){
+    c =  getchar();
+    if(c == EOF){
+      return EOF_TGCHAR;
     }
-    if (s[i]=='P'){
-      len-=n;
-      if(len<0) {
-	len=0;
+    if(c < 32){
+      switch(decaret(c)){
+      case 'H' : len--; if(len < 0){ len = 0; }; break;
+      case 'K' : case 'L' : //Same as ^J so no break
+      case 'J' : addchar(0); puts(buffer); len=0; break;
+      case 'N' : case 'O' : case 'G' : break; //Ignore these
+      case '[' : return RESTART_ESC; break;
+      case 'X' : return INTER_ESC; break;
+      case 'Z' : return INTER_ESC; break;
+      default  : addchar(c);
+      }
+    }else{
+      if(c == 0x9B){ //Error on CSI character
+	fprintf(stderr, "File contains 0x9B control sequence start.  "
+		"Unsupported in this version of typescript2txt.  \n"
+		"Replace with ESC [.");
+	exit(-1);
+      }else if(c != 0x7F){ //Ignore DEL char, return all others
+	return c;
       }
     }
-    if (s[i]=='@'){
-      addchar(' '); //should add n instances of ' '
+  }
+}
+
+void handleESC(char c) {
+  int first_char; //First character read
+  int lc;         //Last character read
+  int params[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; //Numeric parameters
+  int iparam=0;   //Maximum valid index in params array
+  do{
+    do{
+      first_char = lc = tgetchar();
+    }while(lc == RESTART_ESC);
+
+    params[0] = iparam = 0;
+    if (c=='[') {
+      while(isdigit(lc)) { 
+	params[iparam]=params[iparam]*10+(lc-'0'); 
+	lc=tgetchar();
+	if(lc == ';'){
+	  ++iparam;
+	  params[iparam] = 0;
+	  lc=tgetchar();
+	} 
+      }
+
+      if(lc <= 255){
+	if (lc=='P'){
+	  len-=params[0];
+	  if(len<0) {
+	    len=0;
+	  }
+	}
+	if (lc=='@'){
+	  addchar(' '); //should add n instances of ' '
+	}
+      }else{
+	switch(lc){
+	case INTER_ESC: return; break;
+	case EOF_TGCHAR: return; break;
+	case RESTART_ESC: break;
+	default: 
+	  fprintf(stderr, "Unexpected return value from tgetchar: %d\n", lc);
+	  exit(3);
+	}
+      }
+    } else if (c==']') { // Just strip out all "set icon" and "set title" commands
+      while(getchar()>caret('G'));
     }
-  } else if (c==']') { // Just strip out all "set icon" and "set title" commands
-    while(getchar()>caret('G'));
-  }
-  if (s[0]=='A') {
-    len=2;
-  }
+    //Not sure what this is doing
+    if(first_char == 'A'){
+      len = 2;
+      return;
+    }
+  }while(lc == RESTART_ESC);
 }
 
 int main () {
