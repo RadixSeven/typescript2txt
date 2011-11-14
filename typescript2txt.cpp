@@ -24,14 +24,72 @@
  * This program might be better implemented as a python script.
  *
  * John C. McCabe-Dansted (gmatht@gmail.com) 2008
+ *
+ * Gutted and rewritten in C++ by Eric Moyer in 2011
+ *
  * Permission is granted to distribute this software under any version
  * of the BSD and GPL licenses.
  *******************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdint.h>
+#include <iostream>
+#include <cstdlib>
+#include <vector>
+#include <string>
+#include <cctype>
+
+/// Reads typescript output for a linuxterm (and maybe xterm?) and
+/// recreates what would be on a very long screen (long enough to hold
+/// everything in the file), ignoring color and other formatting
+/// characters
+class Reader{
+  /// The lines that will be output.
+  std::vector<std::vector<char> > lines;
+  /// The index of the cur
+  std::size_t line_idx;
+  /// The index of the cursor on the current line, where the next
+  /// character will be written.  May be (and very frequently is) one past
+  /// the end of the line.
+  std::size_t char_idx;
+  
+  /// Enum to specify the different states the reader can be in
+  enum RState{
+    SAW_NOTHING,
+    SAW_ESC, ///ESC ( ^] ) was seen
+    SAW_CSI, ///Control sequence introducer - ESC [ or 0x9B
+    SAW_OSC ///Operating system command ESC ]
+  };
+
+  /// The current state of the reader (in escape code etc.)
+  RState state;
+  
+  /// Return the current line
+  std::vector<char>& cur_line(){ return lines.at(line_idx); }
+
+  /// Perform a line-feed, adding blank lines if necessary
+  void line_feed(){ 
+    ++line_idx;
+    while(line_idx >= lines.size()) {
+      lines.push_back("");
+    }
+    if(char_idx > cur_line().size()){
+      char_idx = cur_line().size();
+    }
+  }
+
+
+public:
+  /// Create an empty reader that has read nothing
+  Reader():line_idx(0),char_idx(0){
+    lines.push_back(std::vector<char>());
+  }
+
+  /// \brief Read from the given typescript output stream using the reader's
+  /// \brief current state
+  void read_from(std::istream& in);
+};
+
+void Reader::read_from(std::istream& in){
+}
 
 char* buffer=NULL;
 int32_t  buffer_size=0;
