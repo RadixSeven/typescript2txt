@@ -427,11 +427,9 @@ void Reader::read_from(std::istream& in){
     }
     switch(state){
     case SAW_NOTHING:
-      //      std::cerr << "sn\n"; //DEBUG
       put_char(c);
       break;
     case SAW_ESC: ///ESC ( ^] ) was seen (but no trailing ] or [ )
-      //      std::cerr << "se\n"; //DEBUG
       next_state = SAW_NOTHING;
       switch(c){
       case 'c': break; //Terminal reset, do nothing
@@ -456,7 +454,6 @@ void Reader::read_from(std::istream& in){
       set_state(next_state);
       break;
     case SAW_CSI: ///Control sequence introducer - ESC [ or 0x9B
-      //      std::cerr << "scsi\n"; //DEBUG
       unknown_code("conrol sequence (0x9B or ESC [)",c);
       break;
     case SAW_ESC_PCT: ///   ESC %
@@ -588,6 +585,7 @@ void Reader::read_from(std::istream& in){
       }
       break;
     case SAW_CSI_LBRACKET: /// ESC [ [ or CSI [ (just eats next char)
+      set_state(SAW_NOTHING);
       break;
     default:
       std::cerr << "ERROR: Unknown reader state (" << ((unsigned)state)
