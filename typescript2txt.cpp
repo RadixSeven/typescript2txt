@@ -250,7 +250,7 @@ class Reader{
   ///
   /// Right now, does nothing but print a warning
   void save_cursor_state(){
-    std::cerr << "Warning: typescript file contains cursor state saving "
+    std::cerr << "Warning: typescript file contains cursor-state-saving "
 	      << "commands that are ignored by this translator.\n";
   }
 
@@ -258,8 +258,27 @@ class Reader{
   ///
   /// Right now, does nothing but print a warning
   void restore_cursor_state(){
-    std::cerr << "Warning: typescript file contains cursor state saving "
+    std::cerr << "Warning: typescript file contains cursor-state-restoring "
 	      << "commands that are ignored by this translator.\n";
+  }
+
+  /// Select character set based on the given \a code which must be @,G, or 8
+  ///
+  /// Right now, does nothing but print a warning
+  ///
+  /// \param code @ selects the default (ISO 646/ISO 8859-1), G and 8
+  ///             select UTF-8
+  void select_character_set(char code){
+    assert(code == '@' || code == 'G' || code == '8');
+    if(code == '@'){
+      std::cerr << "Warning: typescript contains command to set the "
+		<< "character set to ISO 646/ISO 8859-1.  This is "
+		<< "currently ignored by this translator.\n";
+    }else{
+      std::cerr << "Warning: typescript contains command to set the "
+		<< "character set to UTF8.  This is "
+		<< "currently ignored by this translator.\n";
+    }
   }
 
 public:
@@ -338,10 +357,25 @@ void Reader::read_from(std::istream& in){
       unknown_code("conrol sequence (0x9B or ESC [)",c);
       break;
     case SAW_ESC_PCT: ///   ESC %
-      unknown_code("character set select command ESC %",c);
+      switch(c){
+      case '@':	
+      case 'G': 
+      case '8': select_character_set(c); break;
+      default:
+	unknown_code("character set select command ESC %",c);
+      };
+      set_state(SAW_NOTHING);
       break;
     case SAW_ESC_NUM: ///   ESC #
-      unknown_code("DEC screen alignment command ESC #",c);
+      switch(c){
+      case '8':
+	std::cerr << "Warning: typescript file contains DEC screen "
+		  << "alignment command which is ignored "
+		  << "by this translator.\n";
+      default:
+	unknown_code("DEC screen alignment command ESC #",c);
+      };
+      set_state(SAW_NOTHING);
       break;
     case SAW_ESC_LPAREN:/// ESC (
       unknown_code("G0 character set select command ESC (",c);
