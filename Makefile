@@ -36,8 +36,14 @@ tests/06_passed: ./typescript2txt tests/06_esc_M_input.txt tests/06_esc_M_expect
 	diff -q tests/06_esc_M_expected_output.txt tests/06_esc_M_actual_output.txt
 	touch tests/06_passed
 
-test: tests/04_passed tests/05_passed tests/06_passed tests/03_passed 
-test: tests/02_passed tests/01_passed 
+tests/07_passed: ./typescript2txt tests/07_OSC_0_setwi_input.txt tests/07_OSC_0_setwi_expected_output.txt
+	./typescript2txt < tests/07_OSC_0_setwi_input.txt > tests/07_OSC_0_setwi_actual_output.txt
+	diff -q tests/07_OSC_0_setwi_expected_output.txt tests/07_OSC_0_setwi_actual_output.txt
+	touch tests/07_passed
+
+test: tests/04_passed tests/05_passed tests/06_passed 
+test: tests/07_passed
+test: tests/03_passed tests/02_passed tests/01_passed 
 
 clean:
 	-rm -f *.o typescript2txt 
