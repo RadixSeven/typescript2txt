@@ -21,14 +21,49 @@ The code is set up to compile under linux using gcc and gmake.
     make
 
 Will compile everything and produce a typescript2txt executable.  No
-install target has been created.
+install target has been created.  You'll need to copy the executable
+to an appropriate directory.
 
 #History
 
 This started life as code written by John C. McCabe-Dansted
 (gmatht@gmail.com) in 2008 and posted at
 https://launchpadlibrarian.net/14571190/script2txt.c as part of a [bug
-report on launchpad](https://bugs.launchpad.net/ubuntu/+source/util-linux/+bug/231340).
+report on
+launchpad](https://bugs.launchpad.net/ubuntu/+source/util-linux/+bug/231340).
 It had some memory access problems (that kept RadixSeven from using it
 as-is) so he decided to fix it.  In order to share it with the world,
-he made a github repo for it.
+he made a github repo for it.  After fixing the memory access and
+trying to fix other things RadixSeven realized it would be much faster
+and produce better code if he just rewrote everything from scratch.
+This resulted in the code you see here.
+
+#Testing Philosophy
+
+You can run the tests assuming you have diff installed.
+
+The tests are **very** minimal.  It takes a lot of time to write good
+tests.  The initial author did not want to invest that time.  There is
+usually only one test for a code.  So most of the complexity of the
+implementation is not tested.
+
+Further, only tests for codes actually implemented are included.  This
+means that any code that is supposed to generate a warning or a code
+that is ignored is likely to be absent from the test suite.  
+
+Anyone who would like to is welcome to make things more robust by
+fleshing out the test cases to really check the functionality.  Other
+users should be aware that there are likely to be major bugs that
+didn't interfere with the purposes of the earlier authors.
+
+The test cases were created by:
+
+1. Creating a file containing the desired input named *_input.txt
+
+2. Dumping that file to a terminal window (either Gnome's terminal or
+Konsole depending on which computer the developer was using at the
+time)
+
+3. Copying the new contents of the terminal window to the
+expected_output.txt file
+
