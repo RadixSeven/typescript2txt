@@ -117,14 +117,6 @@ class Reader{
     }
   }
 
-  /// Execute character set change to \a num - just prints warning right now
-  ///
-  /// \param num the number of the character set to change to
-  void character_set(int /*num*/){
-    std::cerr << "Warning: typescript file contains character-set-changing "
-	      << "commands that are ignored by this translator.\n";
-  }
-
   /// Insert the given character at the current position, moving to the next one
   ///
   /// \param c There character to insert
@@ -176,13 +168,6 @@ class Reader{
     params.clear();
   }
 
-  /// Set a horizontal tab stop at the current cursor position
-  /// 
-  /// Right now, does nothing but print a warning
-  void set_htab_stop(){
-    std::cerr << "Warning: typescript file contains tab-stop-changing "
-	      << "commands that are ignored by this translator.\n";
-  }
 
   /// Print a warning about \a c whose meaning is unknown in the given context
   ///
@@ -236,6 +221,47 @@ class Reader{
     default: return false;
     }
   }
+
+
+  //###################################################
+  //###################################################
+  //###    Unimplemented Codes That Generate Warnings
+  //###################################################
+  //###################################################
+
+
+  /// Execute character set change to \a num - just prints warning right now
+  ///
+  /// \param num the number of the character set to change to
+  void character_set(int /*num*/){
+    std::cerr << "Warning: typescript file contains character-set-changing "
+	      << "commands that are ignored by this translator.\n";
+  }
+
+  /// Set a horizontal tab stop at the current cursor position
+  /// 
+  /// Right now, does nothing but print a warning
+  void set_htab_stop(){
+    std::cerr << "Warning: typescript file contains tab-stop-changing "
+	      << "commands that are ignored by this translator.\n";
+  }
+
+  /// Save the cursor state for later restoration
+  ///
+  /// Right now, does nothing but print a warning
+  void save_cursor_state(){
+    std::cerr << "Warning: typescript file contains cursor state saving "
+	      << "commands that are ignored by this translator.\n";
+  }
+
+  /// Restore the cursor state for later restoration
+  ///
+  /// Right now, does nothing but print a warning
+  void restore_cursor_state(){
+    std::cerr << "Warning: typescript file contains cursor state saving "
+	      << "commands that are ignored by this translator.\n";
+  }
+
 public:
   /// Create an empty reader that has read nothing
   Reader():line_idx(0),char_idx(0){
@@ -291,6 +317,17 @@ void Reader::read_from(std::istream& in){
       case 'E': carriage_return(); line_feed(); break; //Newline
       case 'H': set_htab_stop(); break; //Set tab stop
       case 'M': reverse_line_feed(); break; //Reverse line feed
+      case 'Z': break; //Ignore dec identification code request
+      case '7': save_cursor_state(); break; //Save cursor state
+      case '8': restore_cursor_state(); break; //Restore cursor state
+      case '[': next_state = SAW_CSI; break; //Control sequence introducer
+      case '%': next_state = SAW_ESC_PCT; break; //ESC %
+      case '#': next_state = SAW_ESC_NUM; break; //ESC #
+      case '(': next_state = SAW_ESC_LPAREN; break; //ESC (
+      case ')': next_state = SAW_ESC_RPAREN; break; //ESC )
+      case '>': break; //Ignore numeric keypad mode
+      case '=': break; //Ignore application keypad mode
+      case ']': next_state = SAW_OSC; break; //Operating system command
       default:
 	unknown_code("escape",c);
       };
@@ -300,23 +337,23 @@ void Reader::read_from(std::istream& in){
       //      std::cerr << "scsi\n"; //DEBUG
       unknown_code("conrol sequence (0x9B or ESC [)",c);
       break;
-    case SAW_OSC: ///Operating system command ESC ]
-      unknown_code("operating system command ESC ]",c);
-      break;
-    case SAW_OSC_P: ///ESC ] P (will read 7 hex digits)
-      unknown_code("palette set command ESC ] P",c);
+    case SAW_ESC_PCT: ///   ESC %
+      unknown_code("character set select command ESC %",c);
       break;
     case SAW_ESC_NUM: ///   ESC #
       unknown_code("DEC screen alignment command ESC #",c);
-      break;
-    case SAW_ESC_PCT: ///   ESC %
-      unknown_code("character set select command ESC %",c);
       break;
     case SAW_ESC_LPAREN:/// ESC (
       unknown_code("G0 character set select command ESC (",c);
       break;
     case SAW_ESC_RPAREN: /// ESC )
       unknown_code("G1 character set select command ESC )",c);
+      break;
+    case SAW_OSC: ///Operating system command ESC ]
+      unknown_code("operating system command ESC ]",c);
+      break;
+    case SAW_OSC_P: ///ESC ] P (will read 7 hex digits)
+      unknown_code("palette set command ESC ] P",c);
       break;
     case SAW_CSI_LBRACKET: /// ESC [ [ or CSI [ (just eats next char)
       break;
