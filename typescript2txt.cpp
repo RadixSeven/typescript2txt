@@ -61,6 +61,9 @@ class Reader{
     SAW_ESC, ///ESC ( ^] ) was seen (but no trailing ] or [ )
     SAW_CSI, ///Control sequence introducer - ESC [ or 0x9B
     SAW_OSC, ///Operating system command ESC ]
+    SAW_OSC_EAT_2_BEL, ///Ignore all characters until ^G in OSC
+    SAW_OSC_4, ///OSC followed by a 4
+    SAW_OSC_5, ///OSC followed by a 5
     SAW_OSC_P, ///ESC ] P (will read 7 hex digits)
     SAW_ESC_NUM, ///   ESC #
     SAW_ESC_PCT, ///   ESC %
@@ -414,9 +417,13 @@ void Reader::read_from(std::istream& in){
     RState next_state = SAW_NOTHING;
     int tmp_val;
     char c = in.get();
-    if(in.eof()){ break; } //Don't process end of line
-    if(id_and_process_control_char(c)){
-      continue;
+    if(in.eof()){ break; } //Don't process end of file
+    //Process control characters unless in an operating system command
+    //that terminates with a BEL character
+    if(state != SAW_OSC_EAT_2_BEL){ 
+      if(id_and_process_control_char(c)){
+	continue;
+      }
     }
     switch(state){
     case SAW_NOTHING:
@@ -500,10 +507,32 @@ void Reader::read_from(std::istream& in){
       switch(c){
       case 'P': next_state = SAW_OSC_P; break;
       case 'R': reset_palette(); break;
+      case '0': next_state = SAW_OSC_EAT_2_BEL; break;
+      case '1': next_state = SAW_OSC_EAT_2_BEL; break;
+      case '2': next_state = SAW_OSC_EAT_2_BEL; break;
+      case '4': next_state = SAW_OSC_4; break;
+      case '5': next_state = SAW_OSC_5; break;
       default:
 	unknown_code("operating system command ESC ]",c);
       }
       set_state(next_state);
+      break;
+    case SAW_OSC_EAT_2_BEL:
+      if(c=='\x07'){ //^G seen, go back to normal mode
+	set_state(SAW_NOTHING);
+      }
+      break;
+    case SAW_OSC_4:
+      if(c!='6'){
+	unknown_code("operating system command number 4 (ESC ] 4)",c);
+      }
+      set_state(SAW_OSC_EAT_2_BEL);
+      break;
+    case SAW_OSC_5:
+      if(c!='0'){
+	unknown_code("operating system command number 5 (ESC ] 5)",c);
+      }
+      set_state(SAW_OSC_EAT_2_BEL);
       break;
     case SAW_OSC_P: ///ESC ] P (will read 7 hex digits)
       //params[0] holds the number of hex digits read
