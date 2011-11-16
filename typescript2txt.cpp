@@ -223,6 +223,18 @@ class Reader{
   }
 
 
+  /// \brief Return a string containing instructions for reporting an issue
+  /// \brief with the program
+  ///
+  /// \return a string containing instructions for reporting an issue
+  ///         with the program
+  char const * issue_report_boilerplate(){
+    return "Please submit an issue report to "
+      "https://github.com/RadixSeven/typescript2txt/issues "
+      "and include the file you were processing by following the instructions "
+      "in https://github.com/ned14/Easyshop/issues/1\n";
+  }
+
   //###################################################
   //###################################################
   //###    Unimplemented Codes That Generate Warnings
@@ -233,9 +245,10 @@ class Reader{
   /// Execute character set change to \a num - just prints warning right now
   ///
   /// \param num the number of the character set to change to
-  void character_set(int /*num*/){
-    std::cerr << "Warning: typescript file contains character-set-changing "
-	      << "commands that are ignored by this translator.\n";
+  void character_set(int num){
+    std::cerr << "Warning: typescript file contains command to change to the "
+	      << "G" << num << " character set.  This command is ignored by "
+	      << "this translator.\n";
   }
 
   /// Set a horizontal tab stop at the current cursor position
@@ -268,19 +281,59 @@ class Reader{
   ///
   /// \param code @ selects the default (ISO 646/ISO 8859-1), G and 8
   ///             select UTF-8
-  void select_character_set(char code){
+  void select_character_set(const char code){
     assert(code == '@' || code == 'G' || code == '8');
     if(code == '@'){
       std::cerr << "Warning: typescript contains command to set the "
 		<< "character set to ISO 646/ISO 8859-1.  This is "
 		<< "currently ignored by this translator.\n";
-    }else{
+    }else if(code == 'G' || code == '8'){
       std::cerr << "Warning: typescript contains command to set the "
 		<< "character set to UTF8.  This is "
 		<< "currently ignored by this translator.\n";
+    }else{
+      std::cerr << "SERIOUS WARNING: Illegal code passed to "
+		<< "select_character_set.  Ignoring.\n"
+		<< issue_report_boilerplate();
+      return;
     }
   }
 
+  /// Define the character set mapping for G0 or G1 
+  ///
+  /// Right now does nothing but print a warning.
+  ///
+  /// Assumes code is one of B,0,U, or X and g_number is 0 or 1
+  ///
+  /// \param g_number if 0 defines, G0, if 1 defines G1
+  ///
+  /// \param code The character from the escape code indicating which
+  ///             mapping.  From the man page: B = Select default (ISO
+  ///             8859-1 mapping), 0 = Select VT100 graphics mapping,
+  ///             U = Select null mapping - straight to character ROM,
+  ///             K = Select user mapping - the map that is loaded by
+  ///             the utility mapscrn(8).
+  void  define_g_character_set(const unsigned g_number, const char code){
+    assert(code == 'B' || code == '0' || code == 'U' || code == 'K');
+    assert(g_number == 0 || g_number == 1);
+    std::string mapping;
+    switch(code){
+    case 'B': mapping = "ISO 8859-1"; break;
+    case '0': mapping = "VT100 graphics"; break;
+    case 'U': mapping = "the null mapping (straight to character ROM)"; break;
+    case 'K': mapping = "the user mapping (loaded by mapscrn(8))"; break;
+    default:
+      std::cerr << "SERIOUS WARNING: Illegal code passed to "
+		<< "define_g_character_set.  Ignoring."
+		<< issue_report_boilerplate();
+      return;
+    }
+    char g_char = (g_number == 0?'(':')');
+    std::cerr << "Warning: typescript contains command defione the G" 
+	      << g_number << " character set as " << mapping << "\n"
+	      << "This command -- ESC " << g_char
+	      << ' ' << code << " -- is currently ignored by this translator.";
+  }
 public:
   /// Create an empty reader that has read nothing
   Reader():line_idx(0),char_idx(0){
@@ -378,10 +431,26 @@ void Reader::read_from(std::istream& in){
       set_state(SAW_NOTHING);
       break;
     case SAW_ESC_LPAREN:/// ESC (
-      unknown_code("G0 character set select command ESC (",c);
+      switch(c){
+      case 'B': 
+      case '0':
+      case 'U':
+      case 'K': define_g_character_set(0,c); break;
+      default:
+	unknown_code("define G0 character set command ESC (",c);
+      };
+      set_state(SAW_NOTHING);
       break;
     case SAW_ESC_RPAREN: /// ESC )
-      unknown_code("G1 character set select command ESC )",c);
+      switch(c){
+      case 'B': 
+      case '0':
+      case 'U':
+      case 'K': define_g_character_set(1,c); break;
+      default:
+	unknown_code("define G1 character set command ESC )",c);
+      };
+      set_state(SAW_NOTHING);
       break;
     case SAW_OSC: ///Operating system command ESC ]
       unknown_code("operating system command ESC ]",c);
