@@ -253,11 +253,18 @@ public:
   void write_to(std::ostream& out) const{
     std::vector<std::vector<char> >::const_iterator line;
     for(line = lines.begin(); line != lines.end(); ++line){
+      std::vector<std::vector<char> >::const_iterator next_line = line;
+      ++next_line;
       std::vector<char>::const_iterator ch;
       for(ch = line->begin(); ch != line->end(); ++ch){
 	out << *ch;
       }
-      out << std::endl;
+      //Output a newline unless this is the last line and it is blank
+      //(meaning that it was created by a previous newline but nothing
+      //was written to it)
+      if(! (line->size() == 0 && next_line == lines.end()) ){
+	out << std::endl;
+      }
     }
   }
 };
