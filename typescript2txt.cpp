@@ -114,24 +114,24 @@ class Reader{
     char_idx = 0;
   }
 
-  /// Perform a back-space - delete previous char but not past beginning of line
+  /// Perform a back-space - move back over previous character
   void back_space(){
     if(char_idx > 0){
-      unsigned idx_to_delete = char_idx - 1;
-      cur_line().erase(cur_line().begin() + idx_to_delete);
+      --char_idx;
     }
   }
 
-  /// Insert the given character at the current position, moving to the next one
+  /// Insert the given character at the current position, not moving
+  ///
+  /// Inserts \a c at the current position.  Does not change the
+  /// current position.
   ///
   /// \param c There character to insert
   void insert_char(char c){
     if(char_idx == cur_line().size()){
       cur_line().push_back(c);
-      ++char_idx;
     }else if(char_idx < cur_line().size()){
       cur_line().insert(char_idx + cur_line().begin(), c);
-      ++char_idx;
     }else{
       std::cerr << "ERROR: char_idx more than one space beyond end "
 		<< "of line in insert\n";
@@ -227,6 +227,34 @@ class Reader{
     }
   }
 
+
+  /// Performs the insert blank CSI command ESC [ ... @
+  ///
+  /// If not at the end of a line, inserts the number of blanks
+  /// required by \a [param.  
+  ///
+  /// At the end of a line, does nothing.
+  ///
+  /// \param params is an array with the parameters passed to the
+  ///               command.  If no parameters are given, inserts one
+  ///               blank.  Otherwise, inserts as many blanks as the
+  ///               value of the first parameter.  Prints a warning if
+  ///               there is more than one parameter.
+  void insert_blank(std::vector<unsigned> params){
+    if(params.size() == 0){
+      params.push_back(1);
+    }else if(params.size() > 1){
+      std::cerr << "Warning: too many arguments given to insert "
+		<< "blank CSI command ESC [ ... @\n"
+		<< "Ignoring extra parameters\n";
+    }
+    if(char_idx >= cur_line().size()){
+      return;
+    }
+    for(unsigned b = 0; b < params.front(); ++b){
+      insert_char(' ');
+    }
+  }
 
   /// \brief Return a string containing instructions for reporting an issue
   /// \brief with the program
@@ -454,7 +482,33 @@ void Reader::read_from(std::istream& in){
       set_state(next_state);
       break;
     case SAW_CSI: ///Control sequence introducer - ESC [ or 0x9B
-      unknown_code("conrol sequence (0x9B or ESC [)",c);
+      switch(c){
+      case '0': 
+      case '1': 
+      case '2': 
+      case '3': 
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9': 
+	if(params.size() == 0){
+	  params.push_back(0);
+	}
+	tmp_val = c-'0';
+	params.back() = (params.back()*10)+tmp_val;
+	break;
+      case ';':
+	if(params.size() == 0){
+	  params.push_back(0);
+	}
+	params.push_back(0);
+	break;
+      case '@':	insert_blank(params); set_state(SAW_NOTHING); break;
+      default:
+	unknown_code("conrol sequence (0x9B or ESC [)",c);
+      }
       break;
     case SAW_ESC_PCT: ///   ESC %
       switch(c){
