@@ -29,11 +29,13 @@
  *******************************************************************/
 
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <vector>
 #include <string>
 #include <cctype>
 #include <cassert>
+#include <stdint.h> 
 
 /// Reads typescript output for a linuxterm (and maybe xterm?) and
 /// recreates what would be on a very long screen (long enough to hold
@@ -329,10 +331,50 @@ class Reader{
       return;
     }
     char g_char = (g_number == 0?'(':')');
-    std::cerr << "Warning: typescript contains command defione the G" 
+    std::cerr << "Warning: typescript contains command to define the G" 
 	      << g_number << " character set as " << mapping << "\n"
 	      << "This command -- ESC " << g_char
 	      << ' ' << code << " -- is currently ignored by this translator.";
+  }
+
+  ///Set the palette entry at \a index to the color described by \a rgb
+  ///
+  /// Right now, just prints a warning
+  ///
+  /// \param index The index of of the palette entry to set 0-15 inclusive
+  ///
+  /// \param rgb The 24 bit number whose lower 3 bytes describe the
+  ///            red, green, and blue intensities in that order
+  ///            (xxxxxxxxRRRRRRRRGGGGGGGGBBBBBBBB)
+  void set_palette(int index, int rgb){
+    if(rgb & 0xFF000000){
+      std::cerr << "SERIOUS WARNING: Illegal RGB value "
+		<< std::hex << ((unsigned)rgb) << " passed to "
+		<< "set_palette.  Ignoring."
+		<< issue_report_boilerplate();
+      return;
+    }
+    if(index < 0 || index > 15){
+      std::cerr << "SERIOUS WARNING: Illegal index value "
+		<< index << " passed to "
+		<< "set_palette.  Ignoring."
+		<< issue_report_boilerplate();
+      return;
+    }
+    int r = (rgb >> 16) & 0xFF;
+    int g = (rgb >> 8)  & 0xFF;
+    int b = rgb         & 0xFF;
+    std::cerr << "Warning: typescript contains command to set palette " 
+	      << "entry " << index << " to rgb=("<< r << ',' << g << ','
+	      << b << ")  This command is ignored by this translator.\n";
+  }
+
+  /// Reset the palette 
+  ///
+  /// Right now, does nothing but print a warning
+  void reset_palette(){
+    std::cerr << "Warning: typescript contains command to reset the palette.  " 
+	      << "This command is ignored by this translator.\n";
   }
 public:
   /// Create an empty reader that has read nothing
@@ -370,6 +412,7 @@ public:
 void Reader::read_from(std::istream& in){
   while(in){
     RState next_state = SAW_NOTHING;
+    int tmp_val;
     char c = in.get();
     if(in.eof()){ break; } //Don't process end of line
     if(id_and_process_control_char(c)){
@@ -453,10 +496,67 @@ void Reader::read_from(std::istream& in){
       set_state(SAW_NOTHING);
       break;
     case SAW_OSC: ///Operating system command ESC ]
-      unknown_code("operating system command ESC ]",c);
+      next_state = SAW_NOTHING;
+      switch(c){
+      case 'P': next_state = SAW_OSC_P; break;
+      case 'R': reset_palette(); break;
+      default:
+	unknown_code("operating system command ESC ]",c);
+      }
+      set_state(next_state);
       break;
     case SAW_OSC_P: ///ESC ] P (will read 7 hex digits)
-      unknown_code("palette set command ESC ] P",c);
+      //params[0] holds the number of hex digits read
+      //params[1] holds the index to set
+      //params[2] holds the color to set it to (24 bit integer)
+      if(params.size() != 3 && params.size() != 0){
+	std::cerr << "SERIOUS WARNING: incorrect number of parameters "
+		  << "in OSC palette setting command SAW_OSC_P\n"
+		  << "Ignoring\n"
+		  << issue_report_boilerplate();
+	params.clear();
+      }
+      if(params.size() == 0){
+	params.push_back(0); params.push_back(0); params.push_back(0);
+      }
+      tmp_val = -1;
+      switch(c){
+      case '0': tmp_val = 0; break;
+      case '1': tmp_val = 1; break;
+      case '2': tmp_val = 2; break;
+      case '3': tmp_val = 3; break;
+      case '4': tmp_val = 4; break;
+      case '5': tmp_val = 5; break;
+      case '6': tmp_val = 6; break;
+      case '7': tmp_val = 7; break;
+      case '8': tmp_val = 8; break;
+      case '9': tmp_val = 9; break;
+      case 'A': tmp_val = 10; break;
+      case 'B': tmp_val = 11; break;
+      case 'C': tmp_val = 12; break;
+      case 'D': tmp_val = 13; break;
+      case 'E': tmp_val = 14; break;
+      case 'F': tmp_val = 15; break;
+      default:
+	unknown_code("palette set command ESC ] P",c);
+      }
+      if(tmp_val != -1){
+	++params.at(0);
+	if(params.at(0) == 1){
+	  params.at(1) = tmp_val;
+	}else if(params.at(0) > 1 && params.at(0) <= 7){
+	  params.at(2) = (params.at(2) << 4) + tmp_val;
+	  if(params.at(0) == 7){
+	    set_palette(params.at(1), params.at(2));
+	  }
+	}else{
+	  std::cerr << "SERIOUS WARNING: incorrect number of digits read "
+		    << '(' << params.at(0) << ')'
+		    << "in OSC palette setting command SAW_OSC_P\n"
+		    << "Ignoring\n"
+		    << issue_report_boilerplate();
+	}
+      }
       break;
     case SAW_CSI_LBRACKET: /// ESC [ [ or CSI [ (just eats next char)
       break;
