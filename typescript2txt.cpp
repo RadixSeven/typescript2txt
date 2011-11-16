@@ -290,6 +290,7 @@ void Reader::read_from(std::istream& in){
       case 'D': line_feed(); break; //Line feed
       case 'E': carriage_return(); line_feed(); break; //Newline
       case 'H': set_htab_stop(); break; //Set tab stop
+      case 'M': reverse_line_feed(); break; //Reverse line feed
       default:
 	unknown_code("escape",c);
       };
