@@ -1,0 +1,4 @@
+1Cursor down in middle of text
+2
+3Should not appear[2A[BText between cursor down and newline
+4Text after newline

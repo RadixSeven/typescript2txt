@@ -1,0 +1,2 @@
+Cursor down at end of textText between cursor down and newline
+Next line

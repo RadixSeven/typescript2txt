@@ -1,0 +1,3 @@
+1Cursor down in middle of text
+2                 Text between cursor down and newline
+4Text after newline
