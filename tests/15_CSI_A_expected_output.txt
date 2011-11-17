@@ -1,0 +1,9 @@
+1
+2
+3ABCDE
+4AB    This is cursor up 4 with some preceeding characters
+5ABC
+6A
+7AB
+8ABCDEF
+

@@ -1,0 +1,13 @@
+1
+2
+3ABCDE
+4AB
+5AB
+6AB
+7AB
+8ABCDEF[5AThis is cursor up 5 with some preceeding characters
+
+
+
+
+

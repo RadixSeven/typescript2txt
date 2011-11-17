@@ -103,11 +103,12 @@ class Reader{
     }
   }
 
-  /// Perform a tab: Insert enough spaces at the current position to move to a multiple of 8
+  /// Perform a tab: position the cursor at the next tab stop
+  ///
+  /// Since tab-stops cannot be set right now, just puts the cursor at
+  /// the next multiple of 8
   void tab(){
-    while(char_idx % 8 != 0){
-      put_char(' ');
-    }
+    char_idx += (8-(char_idx%8))%8;
   }
 
   /// Perform a carriage return - put the current character index at the beginning of the line
@@ -125,18 +126,24 @@ class Reader{
   /// Insert the given character at the current position, not moving
   ///
   /// Inserts \a c at the current position.  Does not change the
-  /// current position.
+  /// current position. If the current character is beyond the end of
+  /// the line, inserts enough spaces so that the character is written
+  /// at the correct position.
   ///
-  /// \param c There character to insert
+  /// \param c The character to insert
   void insert_char(char c){
+    while(char_idx > cur_line().size()){
+      cur_line().push_back(' ');
+    }
+    assert(char_idx <= cur_line().size());
     if(char_idx == cur_line().size()){
       cur_line().push_back(c);
     }else if(char_idx < cur_line().size()){
       cur_line().insert(char_idx + cur_line().begin(), c);
     }else{
-      std::cerr << "ERROR: char_idx more than one space beyond end "
-		<< "of line in insert\n";
-      std::exit(-1);
+      std::cerr << "SERIOUS WARNING: Impossible value for char_idx "
+		<< "in insert_char.  Ignoring.\n"
+		<< issue_report_boilerplate();
     }
   }
 
@@ -144,11 +151,15 @@ class Reader{
   ///
   /// Sets the character a the current position to \a c then advances
   /// the current character to the next position.  If the current
-  /// character is beyond the end of the line, inserts \a c at the end
-  /// of the line
+  /// character is beyond the end of the line, inserts enough spaces
+  /// so that the character is written at the correct position.
   ///
   /// \param c The new value of the character at the current position
   void put_char(char c){
+    while(char_idx > cur_line().size()){
+      cur_line().push_back(' ');
+    }
+    assert(char_idx <= cur_line().size());
     if(char_idx == cur_line().size()){
       cur_line().push_back(c);
       ++char_idx;
@@ -156,9 +167,9 @@ class Reader{
       cur_line().at(char_idx) = c;
       ++char_idx;
     }else{
-      std::cerr << "ERROR: char_idx more than one space beyond end of "
-		<< "line in put\n";
-      std::exit(-1);
+      std::cerr << "SERIOUS WARNING: Impossible value for char_idx "
+		<< "in put_char.  Ignoring.\n"
+		<< issue_report_boilerplate();
     }
   }
 
@@ -232,7 +243,7 @@ class Reader{
   /// Performs the insert blank CSI command ESC [ ... @
   ///
   /// If not at the end of a line, inserts the number of blanks
-  /// required by \a [param.  
+  /// required by \a param.  
   ///
   /// At the end of a line, does nothing.
   ///
@@ -254,6 +265,58 @@ class Reader{
     }
     for(unsigned b = 0; b < params.front(); ++b){
       insert_char(' ');
+    }
+  }
+
+  /// Performs the cursor up CSI command ESC [ ... A
+  ///
+  /// Moves the cursor up the number of lines required by \a param.
+  /// Does not make new lines above the first line.
+  ///
+  /// \param params is an array with the parameters passed to the
+  ///               command.  If no parameters are given, goes up one
+  ///               line blank.  Otherwise, goes up as many lines as
+  ///               the value of the first parameter.  Prints a
+  ///               warning if there is more than one parameter.  Does
+  ///               not go above the first line
+  void cursor_up(std::vector<unsigned> params){
+    if(params.size() == 0){
+      params.push_back(1);
+    }else if(params.size() > 1){
+      std::cerr << "Warning: too many arguments given to cursor up "
+		<< "CSI command ESC [ ... A\n"
+		<< "Ignoring extra parameters\n";
+    }
+    if(line_idx > params.front()){
+      line_idx -= params.front();
+    }else{
+      line_idx = 0;
+    }
+  }
+
+  /// Performs the cursor down CSI command ESC [ ... B
+  ///
+  /// Moves the cursor down the number of lines required by \a param.
+  /// Does not make new lines below the last line.
+  ///
+  /// \param params is an array with the parameters passed to the
+  ///               command.  If no parameters are given, goes down one
+  ///               line blank.  Otherwise, goes down as many lines as
+  ///               the value of the first parameter.  Prints a
+  ///               warning if there is more than one parameter.  Does
+  ///               not go above the first line
+  void cursor_down(std::vector<unsigned> params){
+    if(params.size() == 0){
+      params.push_back(1);
+    }else if(params.size() > 1){
+      std::cerr << "Warning: too many arguments given to cursor down "
+		<< "CSI command ESC [ ... A\n"
+		<< "Ignoring extra parameters\n";
+    }
+    if(line_idx + params.front() < lines.size()){
+      line_idx += params.front();
+    }else{
+      line_idx = params.size() - 1;
     }
   }
 
@@ -507,6 +570,8 @@ void Reader::read_from(std::istream& in){
 	params.push_back(0);
 	break;
       case '@':	insert_blank(params); set_state(SAW_NOTHING); break;
+      case 'A': cursor_up(params); set_state(SAW_NOTHING); break;
+      case 'B': cursor_down(params); set_state(SAW_NOTHING); break;
       default:
 	unknown_code("conrol sequence (0x9B or ESC [)",c);
       }

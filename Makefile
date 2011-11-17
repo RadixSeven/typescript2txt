@@ -61,9 +61,36 @@ tests/11_passed: ./typescript2txt tests/11_insert_blank_input.txt tests/11_inser
 	@diff -q tests/11_insert_blank_expected_output.txt tests/11_insert_blank_actual_output.txt
 	touch tests/11_passed
 
+tests/12_passed: ./typescript2txt tests/12_CSI_A_input.txt tests/12_CSI_A_expected_output.txt
+	@./typescript2txt < tests/12_CSI_A_input.txt > tests/12_CSI_A_actual_output.txt
+	@diff -q tests/12_CSI_A_expected_output.txt tests/12_CSI_A_actual_output.txt
+	touch tests/12_passed
+
+tests/13_passed: ./typescript2txt tests/13_CSI_A_input.txt tests/13_CSI_A_expected_output.txt
+	@./typescript2txt < tests/13_CSI_A_input.txt > tests/13_CSI_A_actual_output.txt
+	@diff -q tests/13_CSI_A_expected_output.txt tests/13_CSI_A_actual_output.txt
+	touch tests/13_passed
+
+tests/14_passed: ./typescript2txt tests/14_CSI_A_input.txt tests/14_CSI_A_expected_output.txt
+	@./typescript2txt < tests/14_CSI_A_input.txt > tests/14_CSI_A_actual_output.txt
+	@diff -q tests/14_CSI_A_expected_output.txt tests/14_CSI_A_actual_output.txt
+	touch tests/14_passed
+
+tests/15_passed: ./typescript2txt tests/15_CSI_A_input.txt tests/15_CSI_A_expected_output.txt
+	@./typescript2txt < tests/15_CSI_A_input.txt > tests/15_CSI_A_actual_output.txt
+	@diff -q tests/15_CSI_A_expected_output.txt tests/15_CSI_A_actual_output.txt
+	touch tests/15_passed
+
+tests/16_passed: ./typescript2txt tests/16_CSI_AB_input.txt tests/16_CSI_AB_expected_output.txt
+	@./typescript2txt < tests/16_CSI_AB_input.txt > tests/16_CSI_AB_actual_output.txt
+	@diff -q tests/16_CSI_AB_expected_output.txt tests/16_CSI_AB_actual_output.txt
+	touch tests/16_passed
+
 test: tests/04_passed tests/05_passed tests/06_passed 
 test: tests/07_passed tests/08_passed tests/09_passed
 test: tests/10_passed tests/11_passed
+test: tests/12_passed tests/13_passed tests/14_passed
+test: tests/15_passed tests/16_passed
 test: tests/03_passed tests/02_passed tests/01_passed 
 
 clean:

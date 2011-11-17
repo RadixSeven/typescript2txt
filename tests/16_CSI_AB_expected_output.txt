@@ -1,0 +1,10 @@
+1
+2
+3ABCDE
+4AB
+5ABC   This is cursor up 4 then down 1 with preceeding characters
+6A
+7AB
+8ABCDEF
+
+

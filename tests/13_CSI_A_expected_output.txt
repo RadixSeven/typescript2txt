@@ -1,0 +1,7 @@
+This is cursor up 5 with nothing above
+1
+2
+3
+4
+5
+6
