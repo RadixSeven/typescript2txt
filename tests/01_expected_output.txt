@@ -14,12 +14,16 @@ protein:...ta-Sets/Synthetic Data Sets/6$ rm foo.arff
 protein:...ta-Sets/Synthetic Data Sets/6$ mkdir ~/ANN_Data
 protein:...ta-Sets/Synthetic Data Sets/6$ rmdir ~/ANN_Data/
 protein:...ta-Sets/Synthetic Data Sets/6$ mkdir ~/PkFindData
-protein:...ta-Sets/Synthetic Data Sets/6$ mv foo33.arff ~/PkFindData/two_spectra_window_33.arff
-protein:...ta-Sets/Synthetic Data Sets/6$ mv foo65.arff ~/PkFindData/two_spectra_window_65.arff
+protein:...ta-Sets/Synthetic Data Sets/6$ mv foo33.arff ~/PkFindData/two_spectra
+_window_33.arff
+protein:...ta-Sets/Synthetic Data Sets/6$ mv foo65.arff ~/PkFindData/two_spectra
+_window_65.arff
 protein:...ta-Sets/Synthetic Data Sets/6$ pushd ~/PkFindData/
 ~/PkFindData ~/Dropbox/NMR-Training-and-Testing-Data-Sets/Synthetic Data Sets/6
-protein:~/PkFindData$ waffles_learn splittest -reps 10 -stddev -trainratio .7 Error:_Unexpected_token,_0,34,35,_in_arg_8^Cignore 0,34,35 -labels 36 neuralnet
-protein:~/PkFindData$ waffles_learn splittest -reps 10 -stddev -trainratio .7 foo33.arff -ignore 0,34,35 -labels 36 neuralnet
+protein:~/PkFindData$ waffles_learn splittest -reps 10 -stddev -trainratio .7 Er
+ror:_Unexpected_token,_0,34,35,_in_arg_8^Cignore 0,34,35 -labels 36 neuralnet
+protein:~/PkFindData$ waffles_learn splittest -reps 10 -stddev -trainratio .7 fo
+o33.arff -ignore 0,34,35 -labels 36 neuralnet
 _________________________________
 File not found: foo33.arff
 
