@@ -704,9 +704,7 @@ void Reader::read_from(std::istream& in){
 	unimplemented_CSI(c, "Reset mode", params); 
 	set_state(SAW_NOTHING); 
 	break;
-      case 'm': 
-	unimplemented_CSI(c, "Set attributes", params); 
-	set_state(SAW_NOTHING); 
+      case 'm': ignore_CSI(); set_state(SAW_NOTHING); //Ignore char attributes
 	break;
       case 'n': 
 	unimplemented_CSI(c, "Device status report", params); 
