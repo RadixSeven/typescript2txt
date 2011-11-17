@@ -53,6 +53,9 @@ class Reader{
   /// the end of the line.
   std::size_t char_idx;
 
+  /// The width (in characters) of the terminal that this Reader emulates
+  const static std::size_t width = 80;
+
   /// The parameters that are used for the CSI sequences - also used
   /// by some of the OSC commands
   std::vector<unsigned> params;
@@ -157,6 +160,10 @@ class Reader{
   ///
   /// \param c The new value of the character at the current position
   void put_char(char c){
+    if(char_idx >= width){
+      std::cerr << "Warning: cursor beyond bounds of window in put_char.";
+      char_idx = width - 1;
+    }
     while(char_idx > cur_line().size()){
       cur_line().push_back(' ');
     }
@@ -164,9 +171,15 @@ class Reader{
     if(char_idx == cur_line().size()){
       cur_line().push_back(c);
       ++char_idx;
+      if(char_idx >= width){
+	carriage_return(); line_feed();
+      }
     }else if(char_idx < cur_line().size()){
       cur_line().at(char_idx) = c;
       ++char_idx;
+      if(char_idx >= width){
+	carriage_return(); line_feed();
+      }
     }else{
       std::cerr << "SERIOUS WARNING: Impossible value for char_idx "
 		<< "in put_char.  Ignoring.\n"
