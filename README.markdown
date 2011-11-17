@@ -26,17 +26,19 @@ to an appropriate directory.
 
 #History
 
-This started life as code written by John C. McCabe-Dansted
+This program was inspired by code written by John C. McCabe-Dansted
 (gmatht@gmail.com) in 2008 and posted at
 https://launchpadlibrarian.net/14571190/script2txt.c as part of a [bug
 report on
 launchpad](https://bugs.launchpad.net/ubuntu/+source/util-linux/+bug/231340).
 It had some memory access problems (that kept RadixSeven from using it
 as-is) so he decided to fix it.  In order to share it with the world,
-he made a github repo for it.  After fixing the memory access and
-trying to fix other things RadixSeven realized it would be much faster
-and produce better code if he just rewrote everything from scratch.
-This resulted in the code you see here.
+he made a github repo for it.  
+
+After fixing the memory access and trying to fix other things
+RadixSeven realized the process of making it usable would be much
+faster and produce better code if he just rewrote everything from
+scratch.  This resulted in the code you see here.
 
 #Testing Philosophy
 
@@ -67,3 +69,9 @@ time)
 3. Copying the new contents of the terminal window to the
 expected_output.txt file
 
+#Source for console codes
+
+The files I used to crib the console codes from are in the reference
+directory. Their original locations are
+http://www.kernel.org/doc/man-pages/online/pages/man4/console_codes.4.html
+and http://www.kitebird.com/csh-tcsh-book/ctlseqs.pdf

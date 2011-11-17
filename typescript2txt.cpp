@@ -15,14 +15,15 @@
  * documents other xterm commands that could be handled.
  *
  * The rewrite was accomplished mainly by referring to
- * http://unixhelp.ed.ac.uk/CGI/man-cgi?console_codes+4 which can be
- * seen in many linux distros as man console_codes
+ * http://unixhelp.ed.ac.uk/CGI/man-cgi?console_codes+4 and
+ * http://www.kernel.org/doc/man-pages/online/pages/man4/console_codes.4.html
+ * which can be seen in many linux distros as man console_codes
  *
  * It would be easy to support colours if we outputted to e.g. HTML.
  *
  * John C. McCabe-Dansted (gmatht@gmail.com) 2008
  *
- * Gutted and rewritten in C++ by Eric Moyer in 2011
+ * Completely rewritten in C++ by Eric Moyer in 2011
  *
  * Permission is granted to distribute this software under any version
  * of the BSD and GPL licenses.
