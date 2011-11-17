@@ -342,6 +342,37 @@ class Reader{
     char_idx += params.front();
   }
 
+  /// Performs the delete characters CSI command ESC [ ... P
+  ///
+  /// Removes the number of characters indicated by \a params from the
+  /// line to the right of the current cursor location.  Shifts all
+  /// characters after the one to delete to the left to fill in the gap.
+  /// If the cursor is past the end of the line, does nothing.
+  ///
+  /// \param params is an array with the parameters passed to the
+  ///               command.  If no parameters are given, deletes one
+  ///               character.  Otherwise, deletes as many characters
+  ///               as the value of the first parameter.  Prints a
+  ///               warning if there is more than one parameter.
+  void delete_characters(std::vector<unsigned> params){
+    if(params.size() == 0){
+      params.push_back(1);
+    }else if(params.size() > 1){
+      std::cerr << "Warning: too many arguments given to delete characters "
+		<< "CSI command ESC [ ... P\n"
+		<< "Ignoring extra parameters\n";
+    }
+    if(params.front() > 0){
+      if(char_idx < cur_line().size()){
+	unsigned chars_to_right = cur_line().size() - char_idx;
+	unsigned chars_to_delete = std::min(chars_to_right, params.front());
+	std::vector<char>::iterator del_first = cur_line().begin()+char_idx;
+	std::vector<char>::iterator del_end = del_first + chars_to_delete;
+	cur_line().erase(del_first, del_end);
+      }
+    }
+  }
+
   /// \brief Return a string containing instructions for reporting an issue
   /// \brief with the program
   ///
@@ -685,10 +716,7 @@ void Reader::read_from(std::istream& in){
 	unimplemented_CSI(c, "Delete lines", params); 
 	set_state(SAW_NOTHING); 
 	break;
-      case 'P': 
-	unimplemented_CSI(c, "Delete chars", params); 
-	set_state(SAW_NOTHING); 
-	break;
+      case 'P': delete_characters(params); set_state(SAW_NOTHING); break;
       case 'X': 
 	unimplemented_CSI(c, "Erase chars", params); 
 	set_state(SAW_NOTHING); 

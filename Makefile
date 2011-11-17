@@ -106,6 +106,11 @@ tests/20_passed: ./typescript2txt tests/20_CSI_C_input.txt tests/20_CSI_C_expect
 	@diff -q tests/20_CSI_C_expected_output.txt tests/20_CSI_C_actual_output.txt
 	touch tests/20_passed
 
+tests/21_passed: ./typescript2txt tests/21_CSI_P_input.txt tests/21_CSI_P_expected_output.txt
+	@./typescript2txt < tests/21_CSI_P_input.txt > tests/21_CSI_P_actual_output.txt
+	@diff -q tests/21_CSI_P_expected_output.txt tests/21_CSI_P_actual_output.txt
+	touch tests/21_passed
+
 test: tests/02_passed tests/03_passed
 test: tests/04_passed tests/05_passed tests/06_passed 
 test: tests/07_passed tests/08_passed tests/09_passed
@@ -113,6 +118,7 @@ test: tests/10_passed tests/11_passed
 test: tests/12_passed tests/13_passed tests/14_passed
 test: tests/15_passed tests/16_passed tests/17_passed
 test: tests/18_passed tests/19_passed tests/20_passed
+test: tests/21_passed
 test: #Tests after here are not expected to pass yet
 test: tests/01_passed 
 

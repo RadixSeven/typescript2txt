@@ -1,0 +1,5 @@
+Script started on Thu 03 Nov 2011 02:20:51 PM EDT
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+protein:...ta-Sets/Synthetic Data Sets/6$ ./regenerate_api_docs.bashn
