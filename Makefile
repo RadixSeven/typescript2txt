@@ -126,6 +126,36 @@ tests/24_passed: ./typescript2txt tests/24_CSI_P_input.txt tests/24_CSI_P_expect
 	@diff -q tests/24_CSI_P_expected_output.txt tests/24_CSI_P_actual_output.txt
 	touch tests/24_passed
 
+tests/25_passed: ./typescript2txt tests/25_CSI_K_input.txt tests/25_CSI_K_expected_output.txt
+	@./typescript2txt < tests/25_CSI_K_input.txt > tests/25_CSI_K_actual_output.txt
+	@diff -q tests/25_CSI_K_expected_output.txt tests/25_CSI_K_actual_output.txt
+	touch tests/25_passed
+
+tests/26_passed: ./typescript2txt tests/26_CSI_K_input.txt tests/26_CSI_K_expected_output.txt
+	@./typescript2txt < tests/26_CSI_K_input.txt > tests/26_CSI_K_actual_output.txt
+	@diff -q tests/26_CSI_K_expected_output.txt tests/26_CSI_K_actual_output.txt
+	touch tests/26_passed
+
+tests/27_passed: ./typescript2txt tests/27_CSI_K_input.txt tests/27_CSI_K_expected_output.txt
+	@./typescript2txt < tests/27_CSI_K_input.txt > tests/27_CSI_K_actual_output.txt
+	@diff -q tests/27_CSI_K_expected_output.txt tests/27_CSI_K_actual_output.txt
+	touch tests/27_passed
+
+tests/28_passed: ./typescript2txt tests/28_CSI_K_input.txt tests/28_CSI_K_expected_output.txt
+	@./typescript2txt < tests/28_CSI_K_input.txt > tests/28_CSI_K_actual_output.txt
+	@diff -q tests/28_CSI_K_expected_output.txt tests/28_CSI_K_actual_output.txt
+	touch tests/28_passed
+
+tests/29_passed: ./typescript2txt tests/29_CSI_K_input.txt tests/29_CSI_K_expected_output.txt
+	@./typescript2txt < tests/29_CSI_K_input.txt > tests/29_CSI_K_actual_output.txt
+	@diff -q tests/29_CSI_K_expected_output.txt tests/29_CSI_K_actual_output.txt
+	touch tests/29_passed
+
+tests/30_passed: ./typescript2txt tests/30_CSI_K_input.txt tests/30_CSI_K_expected_output.txt
+	@./typescript2txt < tests/30_CSI_K_input.txt > tests/30_CSI_K_actual_output.txt
+	@diff -q tests/30_CSI_K_expected_output.txt tests/30_CSI_K_actual_output.txt
+	touch tests/30_passed
+
 test: tests/02_passed tests/03_passed
 test: tests/04_passed tests/05_passed tests/06_passed 
 test: tests/07_passed tests/08_passed tests/09_passed
@@ -134,7 +164,9 @@ test: tests/12_passed tests/13_passed tests/14_passed
 test: tests/15_passed tests/16_passed tests/17_passed
 test: tests/18_passed tests/19_passed tests/20_passed
 test: tests/21_passed tests/22_passed tests/23_passed
-test: tests/24_passed
+test: tests/24_passed tests/25_passed tests/26_passed
+test: tests/27_passed tests/28_passed tests/29_passed
+test: tests/30_passed
 test: #Tests after here are not expected to pass yet
 test: tests/01_passed 
 

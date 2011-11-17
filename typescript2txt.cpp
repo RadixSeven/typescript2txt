@@ -36,6 +36,7 @@
 #include <string>
 #include <cctype>
 #include <cassert>
+#include <algorithm>
 #include <stdint.h> 
 
 /// Reads typescript output for a linuxterm (and maybe xterm?) and
@@ -373,6 +374,66 @@ class Reader{
     }
   }
 
+  /// Performs the erase line CSI command ESC [ ... K
+  /// 
+  /// If the parameters array is empty removes all characters in
+  /// cur_line() at or after char_idx. 
+  ///
+  /// If the parameters array holds at least one value, then the first
+  /// value must be 1 or 2.  If the first value is neither 1 or 2,
+  /// then prints a warning and does nothing.
+  /// 
+  /// If the first value is 1, the behavior depends on whether
+  /// char_idx is past the end of the line.  If there are characters
+  /// past char_idx in the line, fills all characters from the
+  /// beginning of the line to char_idx (inclusive) with blanks.
+  /// Otherwise the behavior is identical to if the param value had
+  /// been 2.
+  ///
+  /// If the first value is 2, deletes all characters in the array,
+  /// but leaves char_idx the same.
+  ///
+  /// If there is more than one argument, prints a warning
+  ///
+  /// \param params The parameters passed to the CSI K command - see
+  ///               the main text for a description of behavior
+  void erase_line(std::vector<unsigned> params){
+    if(params.size() == 0){
+      if(char_idx < cur_line().size()){
+	std::vector<char>::iterator erasure_start = cur_line().begin()+char_idx;
+	cur_line().erase(erasure_start, cur_line().end());
+      }
+    }else{
+      if(params.size() > 1){
+	std::cerr << "Warning: too many arguments given to erase line "
+		  << "CSI command ESC [ ... K\n"
+		  << "Ignoring extra parameters\n";      
+      }
+      unsigned p = params.front();
+      if(p != 1 && p != 2){
+	std::cerr << "Warning: argument " << p << " passed to erase line "
+		  << "CSI command ESC [ ... K\n"
+		  << "The meaning of this argument is unknown.  "
+		  << "Doing nothing.\n";
+	return;
+      }
+      if(p == 2 || (char_idx + 1) >= cur_line().size()){
+	//Delete whole line:
+	//Param was 2 or we are at or past the last character in the line
+	cur_line().clear();
+	return;
+      }else{
+	//Delete chars before and at char_idx when there is at least
+	//one character that won't be deleted
+	assert(p == 1);
+	assert(char_idx + 1 < cur_line().size());
+	std::vector<char>::iterator erasure_start = cur_line().begin();
+	std::fill(erasure_start, erasure_start + char_idx + 1, ' ');
+	return;
+      }
+    }
+  }
+
   /// \brief Return a string containing instructions for reporting an issue
   /// \brief with the program
   ///
@@ -704,10 +765,7 @@ void Reader::read_from(std::istream& in){
 	unimplemented_CSI(c, "Erase display", params); 
 	set_state(SAW_NOTHING); 
 	break;
-      case 'K': 
-	unimplemented_CSI(c, "Erase line", params); 
-	set_state(SAW_NOTHING); 
-	break;
+      case 'K': erase_line(params); set_state(SAW_NOTHING); break;
       case 'L': 
 	unimplemented_CSI(c, "Insert lines", params); 
 	set_state(SAW_NOTHING); 
