@@ -332,11 +332,58 @@ class Reader{
       "in https://github.com/ned14/Easyshop/issues/1\n";
   }
 
+
+  /// Do nothing
+  ///
+  /// This function is called to document that a CSI command is
+  /// intentionally not implemented because it is not appropriate to
+  /// generating plain text files.
+  void ignore_CSI(){ }
+
+
   //###################################################
   //###################################################
   //###    Unimplemented Codes That Generate Warnings
   //###################################################
   //###################################################
+
+  /// Print a warning that the given CSI command is unimplemented
+  ///
+  /// Unlike the regular escape codes which all have different
+  /// structrues, I can use a generic warning routine because of the
+  /// simple structure of the CSI codes: list of parameters followed
+  /// by an action character.
+  ///
+  /// This warning lets a programmer just implement the codes needed
+  /// to parse his files and ignore the rest.
+  ///
+  /// This is called for CSI codes that may impact plain text output,
+  /// so someone may want to implement them in the future.
+  ///
+  /// \param code The single character command code that identifies
+  ///             the CSI command.  This would be @ for insert blanks,
+  ///             A for cursor up, etc.
+  ///
+  /// \param descr A longer description of the code
+  ///
+  /// \param params The parameters that would have been passed to the code
+  void unimplemented_CSI(char code, std::string descr, 
+			 std::vector<unsigned> params){
+    std::cerr << "Warning: this typescript contains an unimplemented CSI "
+	      << "code \"ESC [ ... " << code << "\".  "
+	      << "The code has description: \"" << descr << "\" and was "
+	      << "passed ";
+    if(params.size() == 0){
+      std::cerr << "no parameters.  ";
+    }else{
+      std::cerr << "The parameters: " << params.at(0);
+      for(std::size_t i=1; i < params.size(); ++i){
+	std::cerr << ", " << params.at(i);
+      }
+      std::cerr << ".  ";
+    }
+    std::cerr << "Ignoring.\n";
+  }
 
 
   /// Execute character set change to \a num - just prints warning right now
@@ -547,6 +594,13 @@ void Reader::read_from(std::istream& in){
       break;
     case SAW_CSI: ///Control sequence introducer - ESC [ or 0x9B
       switch(c){
+      case '?':
+	if(params.size() != 0){
+	  std::cerr << "Warning: typescript contains badly formatted CSI code. "
+		    << "The ? character appears in the parameter list but is "
+		    << "not the first character.  Ignoring.";
+	};
+	break;
       case '0': 
       case '1': 
       case '2': 
@@ -572,6 +626,115 @@ void Reader::read_from(std::istream& in){
       case '@':	insert_blank(params); set_state(SAW_NOTHING); break;
       case 'A': cursor_up(params); set_state(SAW_NOTHING); break;
       case 'B': cursor_down(params); set_state(SAW_NOTHING); break;
+      case 'C': 
+	unimplemented_CSI(c, "Cursor right", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'D': 
+	unimplemented_CSI(c, "Cursor left", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'E': 
+	unimplemented_CSI(c, "Cursor down and to column 1", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'F': 
+	unimplemented_CSI(c, "Cursor up and to column 1", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'G': 
+	unimplemented_CSI(c, "Cursor to column", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'H': 
+	unimplemented_CSI(c, "Cursor to row, column (origin is 1,1)", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'J': 
+	unimplemented_CSI(c, "Erase display", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'K': 
+	unimplemented_CSI(c, "Erase line", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'L': 
+	unimplemented_CSI(c, "Insert lines", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'M': 
+	unimplemented_CSI(c, "Delete lines", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'P': 
+	unimplemented_CSI(c, "Delete chars", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'X': 
+	unimplemented_CSI(c, "Erase chars", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'a': 
+	unimplemented_CSI(c, "Cursor right", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'c': ignore_CSI(); set_state(SAW_NOTHING); //Ignore VT102 id seq.
+	break;
+      case 'd': 
+	unimplemented_CSI(c, "Cursor to row", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'e': 
+	unimplemented_CSI(c, "Cursor down", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'f': 
+	unimplemented_CSI(c, "Cursor to row, column", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'g': 
+	unimplemented_CSI(c, "Clear tab stop", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'h': 
+	unimplemented_CSI(c, "Set mode", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'l': 
+	unimplemented_CSI(c, "Reset mode", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'm': 
+	unimplemented_CSI(c, "Set attributes", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'n': 
+	unimplemented_CSI(c, "Device status report", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'q': ignore_CSI(); set_state(SAW_NOTHING); //Ignore LED setting
+	break;
+      case 'r': 
+	unimplemented_CSI(c, "Set srolling region", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 's': 
+	unimplemented_CSI(c, "Save cursor location", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case 'u': 
+	unimplemented_CSI(c, "Restore cursor location", params); 
+	set_state(SAW_NOTHING); 
+	break;
+      case '`': 
+	unimplemented_CSI(c, "Cursor to column", params); 
+	set_state(SAW_NOTHING); 
+	break;
+	//The following parameters were only in references/ctlseqs.pdf
+      case 'T': ignore_CSI(); set_state(SAW_NOTHING); //Ignore mouse tracking
+	break;
+      case 'x': ignore_CSI(); set_state(SAW_NOTHING); //Ignore term params req.
+	break;
       default:
 	unknown_code("conrol sequence (0x9B or ESC [)",c);
       }
