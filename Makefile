@@ -96,13 +96,25 @@ tests/18_passed: ./typescript2txt tests/18_CSI_B_input.txt tests/18_CSI_B_expect
 	@diff -q tests/18_CSI_B_expected_output.txt tests/18_CSI_B_actual_output.txt
 	touch tests/18_passed
 
+tests/19_passed: ./typescript2txt tests/19_CSI_C_input.txt tests/19_CSI_C_expected_output.txt
+	@./typescript2txt < tests/19_CSI_C_input.txt > tests/19_CSI_C_actual_output.txt
+	@diff -q tests/19_CSI_C_expected_output.txt tests/19_CSI_C_actual_output.txt
+	touch tests/19_passed
+
+tests/20_passed: ./typescript2txt tests/20_CSI_C_input.txt tests/20_CSI_C_expected_output.txt
+	@./typescript2txt < tests/20_CSI_C_input.txt > tests/20_CSI_C_actual_output.txt
+	@diff -q tests/20_CSI_C_expected_output.txt tests/20_CSI_C_actual_output.txt
+	touch tests/20_passed
+
+test: tests/02_passed tests/03_passed
 test: tests/04_passed tests/05_passed tests/06_passed 
 test: tests/07_passed tests/08_passed tests/09_passed
 test: tests/10_passed tests/11_passed
 test: tests/12_passed tests/13_passed tests/14_passed
 test: tests/15_passed tests/16_passed tests/17_passed
-test: tests/18_passed
-test: tests/03_passed tests/02_passed tests/01_passed 
+test: tests/18_passed tests/19_passed tests/20_passed
+test: #Tests after here are not expected to pass yet
+test: tests/01_passed 
 
 clean:
 	-rm -f *.o typescript2txt 

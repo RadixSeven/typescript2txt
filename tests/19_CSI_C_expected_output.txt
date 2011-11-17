@@ -1,0 +1,1 @@
+Cursor right 5 at end of text     Text after the command

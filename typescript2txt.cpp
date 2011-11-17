@@ -301,7 +301,7 @@ class Reader{
   ///
   /// \param params is an array with the parameters passed to the
   ///               command.  If no parameters are given, goes down one
-  ///               line blank.  Otherwise, goes down as many lines as
+  ///               line.  Otherwise, goes down as many lines as
   ///               the value of the first parameter.  Prints a
   ///               warning if there is more than one parameter.  Does
   ///               not go above the first line
@@ -318,6 +318,28 @@ class Reader{
     }else{
       line_idx = params.size() - 1;
     }
+  }
+
+  /// Performs the cursor right CSI command ESC [ ... C
+  ///
+  /// Moves the cursor right the number of columns required by \a
+  /// param.
+  /// 
+  ///
+  /// \param params is an array with the parameters passed to the
+  ///               command.  If no parameters are given, goes right one
+  ///               column.  Otherwise, goes right as many columns as
+  ///               the value of the first parameter.  Prints a
+  ///               warning if there is more than one parameter.
+  void cursor_right(std::vector<unsigned> params){
+    if(params.size() == 0){
+      params.push_back(1);
+    }else if(params.size() > 1){
+      std::cerr << "Warning: too many arguments given to cursor right "
+		<< "CSI command ESC [ ... A\n"
+		<< "Ignoring extra parameters\n";
+    }
+    char_idx += params.front();
   }
 
   /// \brief Return a string containing instructions for reporting an issue
@@ -626,10 +648,7 @@ void Reader::read_from(std::istream& in){
       case '@':	insert_blank(params); set_state(SAW_NOTHING); break;
       case 'A': cursor_up(params); set_state(SAW_NOTHING); break;
       case 'B': cursor_down(params); set_state(SAW_NOTHING); break;
-      case 'C': 
-	unimplemented_CSI(c, "Cursor right", params); 
-	set_state(SAW_NOTHING); 
-	break;
+      case 'C': cursor_right(params); set_state(SAW_NOTHING); break;
       case 'D': 
 	unimplemented_CSI(c, "Cursor left", params); 
 	set_state(SAW_NOTHING); 
