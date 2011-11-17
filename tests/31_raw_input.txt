@@ -1,0 +1,5 @@
+Script started on Thu 03 Nov 2011 02:20:51 PM EDT
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+]0;eric@protein: ~/Dropbox/NMR-Training-and-Testing-Data-Sets/Synthetic Data Sets/6[01;32mprotein[00m:[01;34m...ta-Sets/Synthetic Data Sets/6[00m$ sudo apt-get install doxygen[1P./regenerate_api_docs.bash [4@command[C[C[C[C[C[C[C[C[C[C[C[18Ppushd ../web/[Kwaffles_learn chmod og-rw ../lib/ ../bin/[10Psudo make installchmod o+rw ../binsudo make installchmod o+rw ../binsudo make installchmod og-rw ../lib/ ../bin/[13Pwaffles_learn [9Ppushd ../web/./regenerate_command_docs.bash [4Papi[C[C[C[C[C[C[C[C[C[C[Csudo apt-get install doxygen[Kmv foo65.arff tru[K[K[Ktwo_spectra_65_window.ar rf

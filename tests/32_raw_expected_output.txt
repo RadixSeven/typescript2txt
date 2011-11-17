@@ -1,0 +1,10 @@
+Script started on Thu 03 Nov 2011 02:20:51 PM EDT
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+Some_text_to_show_where_we_areata Sets/6$ mv foo65.arff two_spectra_65_window.ar
+
+
+3
+4
+5

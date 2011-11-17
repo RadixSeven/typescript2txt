@@ -156,6 +156,16 @@ tests/30_passed: ./typescript2txt tests/30_CSI_K_input.txt tests/30_CSI_K_expect
 	@diff -q tests/30_CSI_K_expected_output.txt tests/30_CSI_K_actual_output.txt
 	touch tests/30_passed
 
+tests/31_passed: ./typescript2txt tests/31_raw_input.txt tests/31_raw_expected_output.txt
+	@./typescript2txt < tests/31_raw_input.txt > tests/31_raw_actual_output.txt
+	@diff -q tests/31_raw_expected_output.txt tests/31_raw_actual_output.txt
+	touch tests/31_passed
+
+tests/32_passed: ./typescript2txt tests/32_raw_input.txt tests/32_raw_expected_output.txt
+	@./typescript2txt < tests/32_raw_input.txt > tests/32_raw_actual_output.txt
+	@diff -q tests/32_raw_expected_output.txt tests/32_raw_actual_output.txt
+	touch tests/32_passed
+
 test: tests/02_passed tests/03_passed
 test: tests/04_passed tests/05_passed tests/06_passed 
 test: tests/07_passed tests/08_passed tests/09_passed
@@ -166,7 +176,7 @@ test: tests/18_passed tests/19_passed tests/20_passed
 test: tests/21_passed tests/22_passed tests/23_passed
 test: tests/24_passed tests/25_passed tests/26_passed
 test: tests/27_passed tests/28_passed tests/29_passed
-test: tests/30_passed
+test: tests/30_passed tests/31_passed tests/32_passed
 test: #Tests after here are not expected to pass yet
 test: tests/01_passed 
 
